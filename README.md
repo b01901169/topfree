@@ -8,11 +8,13 @@ requirement:
 enter the small-googleplay directory and type
 
 python Bootstrapper.py Input/bootstrapping_terms.xml2
+
 python Worker.py
 
 wait until it finished, then type
 
 cd .. /n
+
 python print2json.py
 
 It will generate a file called topfree.json, and it's what we want

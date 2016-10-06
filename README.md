@@ -5,12 +5,13 @@ requirement:
 2. sudo pip install lxml.html
 3. sudo pip install pymongo
 
-enter the small-googleplay directory and type:
+enter the small-googleplay directory and type
 
 python Bootstrapper.py Input/bootstrapping_terms.xml2
 python Worker.py
 
-wait until it finished, then type:
+wait until it finished, then type
+
 cd ..
 python print2json.py
 

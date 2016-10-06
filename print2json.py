@@ -23,4 +23,5 @@ for doc in this_cur:
   rank = doc['Rank']
   total_dict[rank] = doc
 
-
+with open('topfree.json','w') as outfile:
+  json.dump(total_dict,outfile)

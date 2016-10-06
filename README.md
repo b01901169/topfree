@@ -12,7 +12,7 @@ python Worker.py
 
 wait until it finished, then type
 
-cd ..
+cd .. /n
 python print2json.py
 
 It will generate a file called topfree.json, and it's what we want

@@ -176,6 +176,7 @@ class Bootstrapper:
         parsed_urls = set()
 
         http_errors = 0
+        rank = 0
         while http_errors <= self._args['max_errors']:
 
             try:
@@ -190,7 +191,6 @@ class Bootstrapper:
                     self._logger.critical('Error [%d] on Response for : %s'
                                        % (response.status_code, category_name))
                 else:
-                    rank = 0
                     for url in self.parse_app_urls(response.text):
                         self._mongo_wrapper.insert_on_queue(url,rank)
                         parsed_urls.add(url)
@@ -204,7 +204,6 @@ class Bootstrapper:
         # Paging through results
         base_skip = 60
         current_multiplier = 1
-
         while http_errors <= self._args['max_errors']:
 
             post_data = self.assemble_category_post_data(current_multiplier,
@@ -222,7 +221,6 @@ class Bootstrapper:
                     self._logger.critical('Error [%d] on Response for : %s'
                                       % (response.status_code, category_name))
                 else:
-                    rank = 0
                     for url in self.parse_app_urls(response.text):
                         if url in parsed_urls:
                             return

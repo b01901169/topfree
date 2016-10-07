@@ -5,6 +5,7 @@ import pymongo
 
 now = datetime.datetime.now()
 this_date = now.strftime("%Y%m%d") + '_topfree'
+#this_date = '20161006_topfree'
 user = ''
 password = ''
 database_name = 'topfree'
@@ -21,6 +22,7 @@ total_dict = {}
 this_cur = this_queue.find()
 for doc in this_cur:
   rank = doc['Rank']
+  print rank
   total_dict[rank] = doc
 
 with open('topfree.json','w') as outfile:

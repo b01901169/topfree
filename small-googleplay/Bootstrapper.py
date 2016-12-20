@@ -235,95 +235,6 @@ class Bootstrapper:
 
             current_multiplier+=1
 
-    def crawl_by_list(self,popular_path,popular_num):
-        parsed_urls = set()
-        prefix = 'https://play.google.com/store/apps/details?id='
-        popular_list = read_popular(popular_path,popular_num,False)
-        for url in popular_list:
-            self._mongo_wrapper.insert_on_queue(prefix + url)
-            parsed_urls.add(url)
-        return
-
-    def crawl_by_search_word(self, word):
-        """
-        Simulates an app search on the play store, using the
-        word argument as the term to be searched.
-
-        Paginates through all the results found and
-        store the unique urls into the MongoDB seed
-        collection
-        """
-
-        self._logger.info('Scraping links of Word : %s' % word)
-        parsed_urls = set()
-
-        # Compiling regex used for parsing page token
-        page_token_regex = regex.compile(r"GAEi+.+\:S\:.{11}\\42,")
-
-        post_url = self.assemble_post_url(word)
-        post_data = self.assemble_word_search_post_data()
-
-        http_errors = 0
-        while http_errors <= self._args['max_errors']:
-
-            try:
-                response = requests.post(post_url,
-                                        data=post_data,
-                                        headers=HTTPUtils.headers,
-                                        verify=self._verify_certificate)
-                                        #proxies=Utils.get_proxy())
-
-                if response.status_code != requests.codes.ok:
-                    http_errors+=1
-                    #Utils.sleep(http_errors)
-                    self._logger.critical('Error [%d] on Response for : %s'
-                                          % (response.status_code, word))
-                else:
-                    for url in self.parse_app_urls(response.text):
-                        self._mongo_wrapper.insert_on_queue(url)
-                        parsed_urls.add(url)
-
-                    break # Response worked
-
-            except requests.exceptions.SSLError as error:
-                print 'SSL_Error : ' + error.errno
-
-        # Paging Through Results
-        while http_errors <= self._args['max_errors']:
-            page_token = page_token_regex.search(response.text)
-
-            if not page_token:
-                print response.ok
-                self._logger.fatal("Couldn't find page token")
-                break
-
-            page_token = self.normalize_page_token(page_token.group())
-            post_data = self.assemble_word_search_post_data(page_token)
-
-            try:
-                response = requests.post(post_url,
-                                         data=post_data,
-                                         headers=HTTPUtils.headers,
-                                         verify=self._verify_certificate)
-                                         #proxies=Utils.get_proxy())
-
-                if response.status_code != requests.codes.ok:
-                    http_errors+=1
-                    #Utils.sleep(http_errors)
-                    self._logger.critical('Error [%d] on Response for : %s'
-                                          % (response.status_code, word))
-                else:
-                    for url in self.parse_app_urls(response.text):
-                        if url in parsed_urls:
-                            return
-
-                        self._mongo_wrapper.insert_on_queue(url)
-                        parsed_urls.add(url)
-                        #Utils.sleep()
-
-            except requests.exceptions.SSLError as error:
-                print 'SSL_Error : ' + error.errno
-
     def start_bootstrapping(self):
         """
         Main Method - Iterates over all categories, keywords,
@@ -360,15 +271,12 @@ class Bootstrapper:
         # Add popular list into queue
         #popular_path = '../../main_src/sorted/null_sorted.txt'
         #popular_num = 1000
-        #self.crawl_by_list(popular_path,popular_num)
 
         # Request for each top level category
         for top_level_category in bs_seed._top_level_categories:
             self.crawl_category(top_level_category)
 
         # Simulating searches for specific words
-        #for word in bs_seed.get_words():
-        #    self.crawl_by_search_word(word)
 
 # Starting Point
 if __name__ == "__main__":
